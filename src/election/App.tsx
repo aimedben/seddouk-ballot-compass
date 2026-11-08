@@ -12,7 +12,6 @@ import { NotificationSettingsModal } from './components/mobile/NotificationSetti
 import { VoteToastNotification } from './components/mobile/VoteToastNotification';
 import { Language, translations } from './i18n';
 import { Party, Candidate, ElectionStatusResponse, ResultsData } from './types';
-import { initialSettings } from './data/initialData';
 import { supabase } from '@/integrations/supabase/client';
 import { dispatchVoteNotification } from './services/notificationService';
 import { AlertCircle } from 'lucide-react';
@@ -28,13 +27,13 @@ export function App() {
     'home' | 'lists' | 'vote' | 'confirm' | 'success' | 'results' | 'admin'
   >('home');
 
-  // Backend & Firestore state
+  // Election data comes from the cloud database (public/status)
   const [statusData, setStatusData] = useState<ElectionStatusResponse>({
-    settings: initialSettings,
+    settings: null,
     hasVoted: false,
     totalValidBallots: 0,
-    totalParties: 4,
-    totalCandidates: 104,
+    totalParties: 0,
+    totalCandidates: 0,
   });
 
   const [parties, setParties] = useState<(Party & { candidates?: Candidate[] })[]>([]);
@@ -391,7 +390,7 @@ export function App() {
             </div>
 
             <div className="text-right rtl:text-left text-[#475569] font-semibold">
-              <span>Hôtel de Ville · Elections 2026 · ⵜⴰⵖⵉⵡⴰⵏⵜ ⵏ ⵚⴻⴷⴷⵓⵇ</span>
+              <span>Elections 2026 · ⵜⴰⵖⵉⵡⴰⵏⵜ ⵏ ⵚⴻⴷⴷⵓⵇ</span>
             </div>
           </div>
         </footer>

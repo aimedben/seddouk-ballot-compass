@@ -38,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           <div className="hidden sm:flex items-center gap-3 text-white/80 text-[11px] font-semibold">
-            <span>Hôtel de Ville — Wilaya de Béjaïa (06)</span>
+            <span>Wilaya de Béjaïa (06)</span>
             <span className="inline-block w-4 h-3 bg-[#008751] rounded-xs relative overflow-hidden shrink-0 border border-white/40">
               <span className="absolute inset-y-0 right-0 w-1/2 bg-white" />
               <span className="absolute inset-0 flex items-center justify-center text-[8px] text-[#D21034] font-black leading-none">★</span>

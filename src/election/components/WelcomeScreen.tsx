@@ -6,7 +6,7 @@ import { ElectionSettings } from '../types';
 
 interface WelcomeScreenProps {
   currentLang: Language;
-  settings: ElectionSettings;
+  settings: ElectionSettings | null;
   onStart: () => void;
   hasVoted: boolean;
   onViewResults: () => void;
@@ -21,6 +21,19 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 }) => {
   const t = translations[currentLang];
   const isAr = currentLang === 'ar';
+
+  // Election settings are read from the cloud database; show a neutral
+  // placeholder until that request lands instead of any bundled defaults.
+  if (!settings) {
+    return (
+      <div className="min-h-[calc(100vh-6.5rem)] flex flex-col items-center justify-center gap-5 px-4 text-center">
+        <div className="animate-spin w-10 h-10 rounded-full border-4 border-[#E0F2FE] border-t-[#0060A8]" />
+        <p className="text-xs font-bold text-[#64748B]">
+          {t.commune} · {t.wilaya}
+        </p>
+      </div>
+    );
+  }
 
   // Format event date
   const formattedDate = settings.eventDate
@@ -98,7 +111,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           <span>·</span>
           <span>{t.wilaya}</span>
           <span>·</span>
-          <span>Hôtel de Ville — Consultation citoyenne</span>
+          <span>Consultation citoyenne</span>
         </div>
       </div>
     </div>
