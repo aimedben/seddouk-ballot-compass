@@ -133,7 +133,7 @@ export const AndroidInstallBanner: React.FC<AndroidInstallBannerProps> = ({
                 {isAr ? 'تثبيت تطبيق أندرويد الرسمي' : 'Application Android — APC Seddouk'}
               </h3>
               <p className="text-xs font-semibold text-[#0060A8] mt-1">
-                SEDDOUK ELECTIONS 2026 · HÔTEL DE VILLE
+                SEDDOUK ELECTIONS 2026
               </p>
             </div>
 
