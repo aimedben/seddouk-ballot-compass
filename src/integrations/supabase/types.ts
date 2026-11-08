@@ -14,16 +14,278 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      audit_logs: {
+        Row: {
+          action: string
+          adjustment: number | null
+          admin_username: string
+          created_at: string
+          entity_id: string
+          entity_name: string
+          entity_type: string
+          id: string
+          new_value: Json | null
+          old_value: Json | null
+          reason: string
+        }
+        Insert: {
+          action: string
+          adjustment?: number | null
+          admin_username: string
+          created_at?: string
+          entity_id: string
+          entity_name: string
+          entity_type: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          reason?: string
+        }
+        Update: {
+          action?: string
+          adjustment?: number | null
+          admin_username?: string
+          created_at?: string
+          entity_id?: string
+          entity_name?: string
+          entity_type?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          reason?: string
+        }
+        Relationships: []
+      }
+      ballots: {
+        Row: {
+          candidate_ids: string[]
+          created_at: string
+          id: string
+          ip_fingerprint: string
+          party_id: string
+        }
+        Insert: {
+          candidate_ids: string[]
+          created_at?: string
+          id: string
+          ip_fingerprint: string
+          party_id: string
+        }
+        Update: {
+          candidate_ids?: string[]
+          created_at?: string
+          id?: string
+          ip_fingerprint?: string
+          party_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ballots_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidates: {
+        Row: {
+          age: number | null
+          arabic_name: string
+          first_name: string
+          id: string
+          is_active: boolean
+          last_name: string
+          list_position: number
+          manual_vote_adjustment: number
+          party_id: string
+          photo_url: string
+          profession: string | null
+        }
+        Insert: {
+          age?: number | null
+          arabic_name?: string
+          first_name: string
+          id: string
+          is_active?: boolean
+          last_name: string
+          list_position: number
+          manual_vote_adjustment?: number
+          party_id: string
+          photo_url?: string
+          profession?: string | null
+        }
+        Update: {
+          age?: number | null
+          arabic_name?: string
+          first_name?: string
+          id?: string
+          is_active?: boolean
+          last_name?: string
+          list_position?: number
+          manual_vote_adjustment?: number
+          party_id?: string
+          photo_url?: string
+          profession?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidates_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "parties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      election_settings: {
+        Row: {
+          data: Json
+          id: string
+        }
+        Insert: {
+          data: Json
+          id: string
+        }
+        Update: {
+          data?: Json
+          id?: string
+        }
+        Relationships: []
+      }
+      parties: {
+        Row: {
+          accent_color: string
+          arabic_name: string
+          display_order: number
+          id: string
+          is_public: boolean
+          list_number: number
+          logo_url: string
+          manual_vote_adjustment: number
+          name: string
+          theme_color: string
+        }
+        Insert: {
+          accent_color?: string
+          arabic_name?: string
+          display_order?: number
+          id: string
+          is_public?: boolean
+          list_number: number
+          logo_url?: string
+          manual_vote_adjustment?: number
+          name: string
+          theme_color?: string
+        }
+        Update: {
+          accent_color?: string
+          arabic_name?: string
+          display_order?: number
+          id?: string
+          is_public?: boolean
+          list_number?: number
+          logo_url?: string
+          manual_vote_adjustment?: number
+          name?: string
+          theme_color?: string
+        }
+        Relationships: []
+      }
+      security_records: {
+        Row: {
+          attempts_count: number
+          first_seen: string
+          ip_fingerprint: string
+          last_attempt: string
+          reason: string | null
+          status: string
+        }
+        Insert: {
+          attempts_count?: number
+          first_seen?: string
+          ip_fingerprint: string
+          last_attempt?: string
+          reason?: string | null
+          status: string
+        }
+        Update: {
+          attempts_count?: number
+          first_seen?: string
+          ip_fingerprint?: string
+          last_attempt?: string
+          reason?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vote_events: {
+        Row: {
+          candidate_count: number
+          created_at: string
+          id: number
+          list_number: number
+          party_id: string
+          party_name: string
+          total_ballots: number
+        }
+        Insert: {
+          candidate_count: number
+          created_at?: string
+          id?: number
+          list_number: number
+          party_id: string
+          party_name: string
+          total_ballots: number
+        }
+        Update: {
+          candidate_count?: number
+          created_at?: string
+          id?: number
+          list_number?: number
+          party_id?: string
+          party_name?: string
+          total_ballots?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cast_ballot: {
+        Args: { p_candidate_ids: string[]; p_fp: string; p_party_id: string }
+        Returns: Json
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +412,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin"],
+    },
   },
 } as const
