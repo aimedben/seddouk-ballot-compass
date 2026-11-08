@@ -25,15 +25,8 @@ import {
   Mail,
 } from 'lucide-react';
 import { Party, Candidate, AuditLog, SecurityRecord, ElectionSettings, ResultsData } from '../../types';
-import {
-  auth,
-  signInWithGoogle,
-  signInWithEmail,
-  signUpWithEmail,
-  logOut as firebaseLogOut,
-  isUserAdmin,
-} from '../../lib/firebase';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable/index';
 
 interface AdminPortalProps {
   onLogout: () => void;
@@ -42,19 +35,13 @@ interface AdminPortalProps {
 
 export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPublic }) => {
   // Auth state
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('seddouk_admin_token'));
-  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
-  const [authMode, setAuthMode] = useState<'google' | 'email' | 'credentials'>('google');
+  const [token, setToken] = useState<string | null>(null);
   const [emailInput, setEmailInput] = useState('seddouk2004@gmail.com');
   const [isSignUp, setIsSignUp] = useState(false);
-  const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
-  const [mustChangePassword, setMustChangePassword] = useState(false);
-  const [newPasswordInput, setNewPasswordInput] = useState('');
-  const [changePwdSuccess, setChangePwdSuccess] = useState('');
 
   // Admin Navigation
   const [activeTab, setActiveTab] = useState<
@@ -161,30 +148,28 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
     }
   }, [token]);
 
-  // Listen to Firebase Auth state
+  // Lovable Cloud session -> admin access (role checked on the server)
+  const checkAdmin = async (accessToken: string | undefined) => {
+    if (!accessToken) {
+      setToken(null);
+      return;
+    }
+    const res = await fetch('/api/public/admin/me', { headers: { Authorization: `Bearer ${accessToken}` } });
+    if (res.ok) {
+      setToken(accessToken);
+      setLoginError('');
+    } else {
+      setToken(null);
+      setLoginError("Ce compte n'a pas les privilèges administrateur pour Seddouk 2026.");
+    }
+  };
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setFirebaseUser(user);
-      if (user && user.email) {
-        if (isUserAdmin(user) || user.email === 'seddouk2004@gmail.com') {
-          try {
-            const res = await fetch('/api/public/admin/firebase-auth', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: user.email, uid: user.uid }),
-            });
-            const data = await res.json();
-            if (res.ok && data.token) {
-              setToken(data.token);
-              localStorage.setItem('seddouk_admin_token', data.token);
-            }
-          } catch (e) {
-            console.error('Firebase session exchange error:', e);
-          }
-        }
-      }
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setTimeout(() => checkAdmin(session?.access_token), 0);
     });
-    return unsubscribe;
+    supabase.auth.getSession().then(({ data }) => checkAdmin(data.session?.access_token));
+    return () => sub.subscription.unsubscribe();
   }, []);
 
   // Google Sign-In
@@ -192,25 +177,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
     setLoginLoading(true);
     setLoginError('');
     try {
-      const user = await signInWithGoogle();
-      if (!user || !user.email) {
-        setLoginError('Échec de la connexion Google.');
-        return;
-      }
-      const res = await fetch('/api/public/admin/firebase-auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email, uid: user.uid }),
+      const result = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: `${window.location.origin}/adminin`,
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setLoginError(data.error || 'Compte non autorisé comme administrateur.');
-        return;
-      }
-      setToken(data.token);
-      localStorage.setItem('seddouk_admin_token', data.token);
-    } catch (e: any) {
-      setLoginError(e.message || 'Erreur lors de la connexion Google.');
+      if (result.error) setLoginError(result.error.message || 'Échec de la connexion Google.');
     } finally {
       setLoginLoading(false);
     }
@@ -222,96 +192,43 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
     setLoginLoading(true);
     setLoginError('');
     try {
-      let user;
       if (isSignUp) {
-        user = await signUpWithEmail(emailInput, passwordInput);
+        const { data, error } = await supabase.auth.signUp({
+          email: emailInput,
+          password: passwordInput,
+          options: { emailRedirectTo: `${window.location.origin}/adminin` },
+        });
+        if (error) throw error;
+        if (!data.session) {
+          setLoginError('Compte créé. Vérifiez votre boîte email pour confirmer votre adresse, puis connectez-vous.');
+        }
       } else {
-        user = await signInWithEmail(emailInput, passwordInput);
+        const { error } = await supabase.auth.signInWithPassword({ email: emailInput, password: passwordInput });
+        if (error) throw error;
       }
-      if (!user || !user.email) {
-        setLoginError('Échec d\'authentification.');
-        return;
-      }
-      const res = await fetch('/api/public/admin/firebase-auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email, uid: user.uid }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setLoginError(data.error || 'Compte non autorisé comme administrateur.');
-        return;
-      }
-      setToken(data.token);
-      localStorage.setItem('seddouk_admin_token', data.token);
     } catch (e: any) {
-      setLoginError(e.message || 'Erreur d\'authentification Firebase.');
+      setLoginError(e.message || "Erreur d'authentification.");
     } finally {
       setLoginLoading(false);
     }
   };
 
-  // Handle Classic Credentials Login
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginLoading(true);
-    setLoginError('');
-
-    try {
-      const res = await fetch('/api/public/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: usernameInput, password: passwordInput }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        setLoginError(data.error || 'Échec de connexion.');
-        setLoginLoading(false);
-        return;
-      }
-
-      setToken(data.token);
-      localStorage.setItem('seddouk_admin_token', data.token);
-      if (data.mustChangePassword) {
-        setMustChangePassword(true);
-      }
-    } catch (e) {
-      setLoginError('Erreur réseau.');
-    } finally {
-      setLoginLoading(false);
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('seddouk_admin_token');
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setToken(null);
     onLogout();
   };
 
-  // Change Password
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch('/api/public/admin/change-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ newPassword: newPasswordInput }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setMustChangePassword(false);
-        setChangePwdSuccess('Mot de passe mis à jour avec succès.');
-        setTimeout(() => setChangePwdSuccess(''), 4000);
-      } else {
-        setLoginError(data.error || 'Erreur lors du changement de mot de passe.');
-      }
-    } catch (e) {
-      setLoginError('Erreur réseau.');
-    }
+  const handleExportCsv = async () => {
+    const res = await fetch('/api/public/admin/export-csv', { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `elections_seddouk_2026_${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   // Adjust votes handler
@@ -513,34 +430,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-white px-3 text-[#64748B] font-black tracking-wider">
-                ou par identifiants
+                ou par email
               </span>
             </div>
           </div>
 
-          {/* Mode Tabs: Email/Password vs Username */}
-          <div className="flex bg-[#F1F5F9] p-1 rounded-xl mb-4 text-xs font-black">
-            <button
-              type="button"
-              onClick={() => setAuthMode('email')}
-              className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer ${
-                authMode === 'email' ? 'bg-[#0060A8] text-white shadow-xs' : 'text-[#64748B]'
-              }`}
-            >
-              Email Firebase
-            </button>
-            <button
-              type="button"
-              onClick={() => setAuthMode('credentials')}
-              className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer ${
-                authMode === 'credentials' ? 'bg-[#0060A8] text-white shadow-xs' : 'text-[#64748B]'
-              }`}
-            >
-              Identifiants admin
-            </button>
-          </div>
-
-          {authMode === 'email' ? (
+          {(
             <form onSubmit={handleEmailSignIn} className="space-y-3.5">
               <div>
                 <label className="text-xs font-bold text-[#0F172A] block mb-1">
@@ -599,53 +494,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
                   : isSignUp
                   ? 'CRÉER LE COMPTE ADMIN'
                   : 'SE CONNECTER PAR EMAIL'}
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleLogin} className="space-y-3.5">
-              <div>
-                <label className="text-xs font-bold text-[#0F172A] block mb-1">
-                  Nom d'utilisateur
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={usernameInput}
-                  onChange={(e) => setUsernameInput(e.target.value)}
-                  placeholder="admin"
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#D0DFEE] focus:border-[#0060A8] focus:outline-none text-sm font-semibold"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-[#0F172A] block mb-1">
-                  Mot de passe
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={passwordInput}
-                    onChange={(e) => setPasswordInput(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full px-4 py-2.5 rounded-xl border border-[#D0DFEE] focus:border-[#0060A8] focus:outline-none text-sm font-semibold pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loginLoading}
-                className="w-full py-3.5 rounded-xl bg-[#0060A8] hover:bg-[#004B87] text-white font-black text-sm transition-all cursor-pointer shadow-md disabled:opacity-50 mt-2"
-              >
-                {loginLoading ? 'Connexion en cours...' : 'SE CONNECTER'}
               </button>
             </form>
           )}
@@ -784,40 +632,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
 
       {/* Main Content Area */}
       <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full overflow-y-auto">
-        {/* Force Password Change Modal Alert */}
-        {mustChangePassword && (
-          <div className="mb-6 p-6 rounded-2xl bg-amber-50 border-2 border-amber-300 shadow-md">
-            <div className="flex items-start gap-4">
-              <AlertTriangle className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <h3 className="text-lg font-black text-amber-900">
-                  Changement de mot de passe obligatoire
-                </h3>
-                <p className="text-xs font-medium text-amber-800 mt-1 mb-4">
-                  Pour des raisons de sécurité, vous devez changer le mot de passe initial (aimed004) dès votre première connexion.
-                </p>
-
-                <form onSubmit={handleChangePassword} className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    type="password"
-                    required
-                    placeholder="Nouveau mot de passe sécurisé"
-                    value={newPasswordInput}
-                    onChange={(e) => setNewPasswordInput(e.target.value)}
-                    className="px-4 py-2.5 rounded-xl border border-amber-300 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  />
-                  <button
-                    type="submit"
-                    className="px-6 py-2.5 rounded-xl bg-[#174B3A] text-white font-extrabold text-sm cursor-pointer hover:bg-[#103D32]"
-                  >
-                    Enregistrer le nouveau mot de passe
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* TAB 1: DASHBOARD */}
         {activeTab === 'dashboard' && dashboardData && (
           <div className="space-y-6">
@@ -839,9 +653,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
                   <RefreshCw className="w-3.5 h-3.5" />
                   <span>Actualiser</span>
                 </button>
-                <a
-                  href="/api/public/admin/export-csv"
-                  download
+                <button
+                  type="button"
+                  onClick={handleExportCsv}
                   className="px-4 py-2 rounded-xl bg-[#174B3A] text-white text-xs font-bold flex items-center gap-1.5 hover:bg-[#103D32] cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
