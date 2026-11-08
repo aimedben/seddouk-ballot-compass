@@ -10,33 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdmininRouteImport } from './routes/adminin'
+import { Route as ApiPublicSplatRouteImport } from './routes/api/public/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdmininRoute = AdmininRouteImport.update({
+  id: '/adminin',
+  path: '/adminin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicSplatRoute = ApiPublicSplatRouteImport.update({
+  id: '/api/public/$',
+  path: '/api/public/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/adminin': typeof AdmininRoute
+  '/api/public/$': typeof ApiPublicSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/adminin': typeof AdmininRoute
+  '/api/public/$': typeof ApiPublicSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/adminin': typeof AdmininRoute
+  '/api/public/$': typeof ApiPublicSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/adminin' | '/api/public/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/adminin' | '/api/public/$'
+  id: '__root__' | '/' | '/adminin' | '/api/public/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdmininRoute: typeof AdmininRoute
+  ApiPublicSplatRoute: typeof ApiPublicSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +68,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/adminin': {
+      id: '/adminin'
+      path: '/adminin'
+      fullPath: '/adminin'
+      preLoaderRoute: typeof AdmininRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/$': {
+      id: '/api/public/$'
+      path: '/api/public/$'
+      fullPath: '/api/public/$'
+      preLoaderRoute: typeof ApiPublicSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdmininRoute: AdmininRoute,
+  ApiPublicSplatRoute: ApiPublicSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
