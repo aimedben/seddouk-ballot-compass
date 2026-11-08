@@ -144,7 +144,7 @@ export const ResultsSection: React.FC<ResultsSectionProps> = ({ results, current
             <>
               {/* 1st Place Highlighted Big Card */}
               {(() => {
-                const first = parties[0];
+                const first = parties[0]!;
                 return (
                   <div
                     key={first.id}
@@ -345,8 +345,8 @@ export const ResultsSection: React.FC<ResultsSectionProps> = ({ results, current
                     <div className="relative">
                       <div className="w-24 h-28 rounded-xl overflow-hidden border-2 border-amber-400 bg-white shadow-xs">
                         <img
-                          src={candidates[0].photoUrl}
-                          alt={candidates[0].lastName}
+                          src={candidates[0]!.photoUrl}
+                          alt={candidates[0]!.lastName}
                           className="w-full h-full object-cover object-top"
                           loading="lazy"
                         />
@@ -360,38 +360,38 @@ export const ResultsSection: React.FC<ResultsSectionProps> = ({ results, current
                       <div className="flex items-center justify-between flex-wrap gap-2">
                         <div>
                           <span className="text-xs font-bold text-amber-900 uppercase tracking-wider block">
-                            Candidat N° {candidates[0].listPosition} sur l'affiche
+                            Candidat N° {candidates[0]!.listPosition} sur l'affiche
                           </span>
                           <h4 className="text-xl sm:text-2xl font-extrabold text-[#202A27]">
-                            {candidates[0].firstName} {candidates[0].lastName}
+                            {candidates[0]!.firstName} {candidates[0]!.lastName}
                           </h4>
-                          {candidates[0].arabicName && (
+                          {candidates[0]!.arabicName && (
                             <p className="text-sm font-bold text-[#202A27]/70" dir="rtl">
-                              {candidates[0].arabicName}
+                              {candidates[0]!.arabicName}
                             </p>
                           )}
                         </div>
 
                         <div className="text-right rtl:text-left">
                           <span className="text-2xl sm:text-3xl font-black text-[#174B3A] tabular-nums">
-                            {candidates[0].voteCount}
+                            {candidates[0]!.voteCount}
                           </span>
                           <span className="text-xs text-[#202A27]/60 block font-semibold">
-                            {candidates[0].percentage}% {t.ballotsWithCandidate}
+                            {candidates[0]!.percentage}% {t.ballotsWithCandidate}
                           </span>
                         </div>
                       </div>
 
-                      {candidates[0].profession && (
+                      {candidates[0]!.profession && (
                         <p className="text-xs text-[#202A27]/70 mt-1 font-medium">
-                          {candidates[0].profession} {candidates[0].age ? `(${candidates[0].age} ans)` : ''}
+                          {candidates[0]!.profession} {candidates[0]!.age ? `(${candidates[0]!.age} ans)` : ''}
                         </p>
                       )}
 
                       <div className="mt-3 w-full bg-amber-200/60 rounded-full h-2.5 overflow-hidden">
                         <div
                           className="bg-amber-500 h-full rounded-full transition-all duration-500"
-                          style={{ width: `${Math.max(3, candidates[0].percentage)}%` }}
+                          style={{ width: `${Math.max(3, candidates[0]!.percentage)}%` }}
                         />
                       </div>
                     </div>

@@ -132,7 +132,7 @@ export async function computeResults() {
     });
   partyResults.sort((a, b) => b.ballotCount - a.ballotCount || a.listNumber - b.listNumber);
   partyResults.forEach((p, i) => {
-    p.rank = i > 0 && p.ballotCount === partyResults[i - 1].ballotCount ? partyResults[i - 1].rank : i + 1;
+    p.rank = i > 0 && p.ballotCount === partyResults[i - 1]!.ballotCount ? partyResults[i - 1]!.rank : i + 1;
   });
 
   const candidatesByParty: Record<string, CandidateResult[]> = {};
@@ -159,7 +159,7 @@ export async function computeResults() {
       });
     list.sort((a, b) => b.voteCount - a.voteCount || a.listPosition - b.listPosition);
     list.forEach((c, j) => {
-      c.rank = j > 0 && c.voteCount === list[j - 1].voteCount ? list[j - 1].rank : j + 1;
+      c.rank = j > 0 && c.voteCount === list[j - 1]!.voteCount ? list[j - 1]!.rank : j + 1;
     });
     candidatesByParty[p.id] = list;
   }
