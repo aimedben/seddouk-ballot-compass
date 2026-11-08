@@ -660,7 +660,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Exporter CSV</span>
-                </a>
+                </button>
               </div>
             </div>
 
