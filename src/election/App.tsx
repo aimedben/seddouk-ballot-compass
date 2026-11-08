@@ -13,14 +13,7 @@ import { VoteToastNotification } from './components/mobile/VoteToastNotification
 import { Language, translations } from './i18n';
 import { Party, Candidate, ElectionStatusResponse, ResultsData } from './types';
 import { initialSettings } from './data/initialData';
-import {
-  testFirestoreConnection,
-  seedFirestoreIfEmpty,
-  submitBallotToFirestore,
-  listenToFirestoreParties,
-  listenToFirestoreCandidates,
-  listenToFirestoreSettings,
-} from './lib/firebase';
+import { supabase } from '@/integrations/supabase/client';
 import { dispatchVoteNotification } from './services/notificationService';
 import { AlertCircle } from 'lucide-react';
 
@@ -67,7 +60,7 @@ export function App() {
   // Fetch election status & results
   const fetchStatus = async () => {
     try {
-      const res = await fetch('/api/status');
+      const res = await fetch('/api/public/status');
       if (res.ok) {
         const data = await res.json();
         setStatusData(data);
@@ -79,7 +72,7 @@ export function App() {
 
   const fetchParties = async () => {
     try {
-      const res = await fetch('/api/parties');
+      const res = await fetch('/api/public/parties');
       if (res.ok) {
         const data = await res.json();
         setParties(data);
@@ -91,7 +84,7 @@ export function App() {
 
   const fetchResults = async () => {
     try {
-      const res = await fetch('/api/results');
+      const res = await fetch('/api/public/results');
       if (res.ok) {
         const data = await res.json();
         setResultsData(data);
@@ -106,63 +99,30 @@ export function App() {
     fetchParties();
     fetchResults();
 
-    // 1. Initialize Firestore connection and seed initial election documents if needed
-    testFirestoreConnection();
-    seedFirestoreIfEmpty();
-
-    // 2. Listen to real-time changes in Firestore for Settings, Parties & Candidates
-    const unsubSettings = listenToFirestoreSettings((settings) => {
-      setStatusData((prev) => ({ ...prev, settings }));
-    });
-
-    const unsubParties = listenToFirestoreParties((firestoreParties) => {
-      setParties((prev) => {
-        return firestoreParties.map((fp) => {
-          const existing = prev.find((p) => p.id === fp.id);
-          return {
-            ...fp,
-            candidates: existing?.candidates || [],
-          };
-        });
-      });
-    });
-
-    const unsubCandidates = listenToFirestoreCandidates((firestoreCandidates) => {
-      setParties((prev) => {
-        return prev.map((p) => ({
-          ...p,
-          candidates: firestoreCandidates.filter((c) => c.partyId === p.id),
-        }));
-      });
-    });
-
-    // 3. Connect to Server-Sent Events (SSE) for live mobile vote notifications
-    const eventSource = new EventSource('/api/live-votes');
-    eventSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'new_vote') {
-          // Trigger notification via our notification service
-          dispatchVoteNotification(
-            {
-              id: `vote-${Date.now()}`,
-              partyId: data.partyId,
-              partyName: data.partyName,
-              listNumber: data.listNumber,
-              candidateCount: data.candidateCount,
-              timestamp: data.timestamp,
-              totalBallots: data.totalBallots,
-            },
-            false
-          );
-          // Refresh live results & status
-          fetchStatus();
-          fetchResults();
-        }
-      } catch (err) {
-        console.error('Error handling live vote event:', err);
-      }
-    };
+    // Live vote notifications via Lovable Cloud realtime
+    const channel = supabase
+      .channel(`vote-events-${Math.random().toString(36).slice(2)}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'vote_events' }, (payload) => {
+        const data = payload.new as {
+          id: number; party_id: string; party_name: string; list_number: number;
+          candidate_count: number; total_ballots: number; created_at: string;
+        };
+        dispatchVoteNotification(
+          {
+            id: `vote-${data.id}`,
+            partyId: data.party_id,
+            partyName: data.party_name,
+            listNumber: data.list_number,
+            candidateCount: data.candidate_count,
+            timestamp: data.created_at,
+            totalBallots: data.total_ballots,
+          },
+          false
+        );
+        fetchStatus();
+        fetchResults();
+      })
+      .subscribe();
 
     // 4. Listen to route changes (/adminin)
     const handleRouteChange = () => {
@@ -176,10 +136,7 @@ export function App() {
 
     return () => {
       window.removeEventListener('popstate', handleRouteChange);
-      eventSource.close();
-      unsubSettings();
-      unsubParties();
-      unsubCandidates();
+      supabase.removeChannel(channel);
     };
   }, []);
 
@@ -190,7 +147,7 @@ export function App() {
     setErrorMessage(null);
 
     try {
-      const res = await fetch('/api/vote', {
+      const res = await fetch('/api/public/vote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -209,13 +166,6 @@ export function App() {
         }
         setIsSubmitting(false);
         return;
-      }
-
-      // Store ballot document in Cloud Firestore directly
-      try {
-        await submitBallotToFirestore(data.ballotId, selectedPartyId, selectedCandidateIds);
-      } catch (fsErr) {
-        console.warn('Firestore ballot storage sync:', fsErr);
       }
 
       // Local success

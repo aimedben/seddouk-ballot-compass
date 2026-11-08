@@ -120,7 +120,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
       const headers = { Authorization: `Bearer ${token}` };
 
       // Dashboard
-      const dashRes = await fetch('/api/admin/dashboard', { headers });
+      const dashRes = await fetch('/api/public/admin/dashboard', { headers });
       if (dashRes.ok) {
         const d = await dashRes.json();
         setDashboardData(d);
@@ -128,7 +128,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
       }
 
       // Parties & Candidates
-      const partiesRes = await fetch('/api/parties');
+      const partiesRes = await fetch('/api/public/parties');
       if (partiesRes.ok) {
         const pList = await partiesRes.json();
         setParties(pList);
@@ -140,13 +140,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
       }
 
       // Security
-      const secRes = await fetch('/api/admin/security', { headers });
+      const secRes = await fetch('/api/public/admin/security', { headers });
       if (secRes.ok) {
         setSecurityData(await secRes.json());
       }
 
       // Audit logs
-      const auditRes = await fetch('/api/admin/audit-logs', { headers });
+      const auditRes = await fetch('/api/public/admin/audit-logs', { headers });
       if (auditRes.ok) {
         setAuditLogs(await auditRes.json());
       }
@@ -168,7 +168,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
       if (user && user.email) {
         if (isUserAdmin(user) || user.email === 'seddouk2004@gmail.com') {
           try {
-            const res = await fetch('/api/admin/firebase-auth', {
+            const res = await fetch('/api/public/admin/firebase-auth', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ email: user.email, uid: user.uid }),
@@ -197,7 +197,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
         setLoginError('Échec de la connexion Google.');
         return;
       }
-      const res = await fetch('/api/admin/firebase-auth', {
+      const res = await fetch('/api/public/admin/firebase-auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user.email, uid: user.uid }),
@@ -232,7 +232,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
         setLoginError('Échec d\'authentification.');
         return;
       }
-      const res = await fetch('/api/admin/firebase-auth', {
+      const res = await fetch('/api/public/admin/firebase-auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user.email, uid: user.uid }),
@@ -258,7 +258,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
     setLoginError('');
 
     try {
-      const res = await fetch('/api/admin/login', {
+      const res = await fetch('/api/public/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: usernameInput, password: passwordInput }),
@@ -293,7 +293,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/admin/change-password', {
+      const res = await fetch('/api/public/admin/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -324,7 +324,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
     const delta = adjustIsAdd ? Math.abs(adjustAmount) : -Math.abs(adjustAmount);
 
     try {
-      const res = await fetch('/api/admin/adjust-votes', {
+      const res = await fetch('/api/public/admin/adjust-votes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -358,7 +358,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
     if (!unblockModal || !unblockReason.trim()) return;
 
     try {
-      const res = await fetch('/api/admin/security/unblock', {
+      const res = await fetch('/api/public/admin/security/unblock', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -383,7 +383,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
   // Toggle IP Protection
   const toggleIpProtection = async (enabled: boolean) => {
     try {
-      const res = await fetch('/api/admin/security/toggle-ip', {
+      const res = await fetch('/api/public/admin/security/toggle-ip', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -402,7 +402,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
   // Update Settings
   const handleUpdateSettings = async (partialSettings: Partial<ElectionSettings>) => {
     try {
-      const res = await fetch('/api/admin/settings', {
+      const res = await fetch('/api/public/admin/settings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -426,7 +426,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
     }
 
     try {
-      const res = await fetch('/api/admin/reset-election', {
+      const res = await fetch('/api/public/admin/reset-election', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -840,7 +840,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToPubl
                   <span>Actualiser</span>
                 </button>
                 <a
-                  href="/api/admin/export-csv"
+                  href="/api/public/admin/export-csv"
                   download
                   className="px-4 py-2 rounded-xl bg-[#174B3A] text-white text-xs font-bold flex items-center gap-1.5 hover:bg-[#103D32] cursor-pointer"
                 >
