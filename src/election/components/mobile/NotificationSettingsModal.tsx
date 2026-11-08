@@ -11,8 +11,8 @@ import {
   ShieldAlert,
   Sparkles,
 } from 'lucide-react';
+import type { NotificationSettings } from '../../types/notifications';
 import {
-  NotificationSettings,
   getNotificationSettings,
   saveNotificationSettings,
   requestNotificationPermission,
