@@ -22,8 +22,8 @@ export interface Candidate {
   lastName: string;
   arabicName: string;
   photoUrl: string;
-  profession?: string;
-  age?: number;
+  profession?: string | undefined;
+  age?: number | undefined;
   isActive: boolean;
   manualVoteAdjustment: number;
   voteCount: number; // calculated or adjusted
@@ -107,8 +107,8 @@ export interface CandidateResult {
   lastName: string;
   arabicName: string;
   photoUrl: string;
-  profession?: string;
-  age?: number;
+  profession?: string | undefined;
+  age?: number | undefined;
   voteCount: number;
   percentage: number; // % of party ballots that selected this candidate
   rank: number;
