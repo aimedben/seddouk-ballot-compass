@@ -54,11 +54,12 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={() => onNavigate('home')}
           className="flex items-center gap-3 text-left rtl:text-right group cursor-pointer focus-visible:outline-2 focus-visible:outline-[#0060A8]"
         >
-          {/* APC Diamond Emblem (inspired by the blue diamond reliefs on the building facade) */}
-          <div className="relative w-11 h-11 flex items-center justify-center shrink-0">
-            <div className="w-9 h-9 bg-[#0060A8] rotate-45 rounded-lg shadow-sm group-hover:bg-[#004B87] transition-colors" />
-            <span className="absolute text-white font-black text-sm tracking-tighter">APC</span>
-          </div>
+          {/* Seddouk logo */}
+          <img
+            src="/seddouk-logo.png"
+            alt="Logo Seddouk"
+            className="w-11 h-11 object-contain shrink-0 group-hover:scale-105 transition-transform"
+          />
 
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
