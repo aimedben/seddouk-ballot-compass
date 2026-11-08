@@ -74,7 +74,7 @@ export interface SecurityRecord {
   lastAttempt: string;
   attemptsCount: number;
   status: 'voted' | 'blocked' | 'unblocked';
-  reason?: string;
+  reason?: string | undefined;
 }
 
 export interface ElectionStatusResponse {

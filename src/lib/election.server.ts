@@ -178,9 +178,9 @@ export async function computeResults() {
 // One fingerprint per client IP, HMAC'd so raw IPs are never stored.
 export async function ipFingerprint(request: Request): Promise<string> {
   const fwd = request.headers.get("x-forwarded-for");
-  let ip = request.headers.get("cf-connecting-ip") || (fwd ? fwd.split(",")[0].trim() : "") || "127.0.0.1";
+  let ip = request.headers.get("cf-connecting-ip") || (fwd ? (fwd.split(",")[0] ?? "").trim() : "") || "127.0.0.1";
   if (ip.startsWith("::ffff:")) ip = ip.slice(7);
-  const secret = process.env.VOTE_SECRET || "seddouk-2026-elections-secret-key-dz-06";
+  const secret = process.env['VOTE_SECRET'] || "seddouk-2026-elections-secret-key-dz-06";
   const key = await crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(secret),
@@ -197,7 +197,7 @@ export async function verifyAdmin(request: Request): Promise<string | null> {
   const auth = request.headers.get("authorization");
   if (!auth?.startsWith("Bearer ")) return null;
   const token = auth.slice(7);
-  const userClient = createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+  const userClient = createClient<Database>(process.env['SUPABASE_URL']!, process.env['SUPABASE_PUBLISHABLE_KEY']!, {
     global: { headers: { Authorization: `Bearer ${token}` } },
     auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
   });

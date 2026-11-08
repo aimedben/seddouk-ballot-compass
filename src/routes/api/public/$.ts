@@ -8,7 +8,8 @@ async function handle(request: Request, splat: string) {
   const { json } = m;
   const method = request.method;
   const path = "/" + splat.replace(/\/$/, "");
-  const body = method === "POST" ? await request.json().catch(() => ({})) : {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const body: any = method === "POST" ? await request.json().catch(() => ({})) : {};
 
   // ---------- PUBLIC ----------
   if (method === "GET" && path === "/status") {
@@ -106,7 +107,7 @@ async function handle(request: Request, splat: string) {
     }
 
     if (method === "POST" && sub === "/adjust-votes") {
-      const { type, entityId, adjustment, reason } = body as Record<string, unknown>;
+      const { type, entityId, adjustment, reason } = body;
       if (typeof reason !== "string" || reason.trim().length < 3)
         return json({ error: "Le motif de modification est obligatoire (au moins 3 caractères)." }, 400);
       const delta = Number(adjustment);
@@ -139,8 +140,9 @@ async function handle(request: Request, splat: string) {
     }
 
     if (method === "POST" && sub === "/parties/update") {
-      const { id, name, arabicName, listNumber, isPublic, logoUrl } = body as Record<string, unknown>;
-      const upd: Record<string, unknown> = {};
+      const { id, name, arabicName, listNumber, isPublic, logoUrl } = body;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const upd: any = {};
       if (name) upd.name = String(name);
       if (arabicName) upd.arabic_name = String(arabicName);
       if (listNumber !== undefined) upd.list_number = Number(listNumber);
@@ -157,9 +159,10 @@ async function handle(request: Request, splat: string) {
     }
 
     if (method === "POST" && sub === "/candidates/save") {
-      const b = body as Record<string, unknown>;
+      const b = body;
       if (b.id) {
-        const upd: Record<string, unknown> = {};
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const upd: any = {};
         if (b.firstName) upd.first_name = String(b.firstName);
         if (b.lastName) upd.last_name = String(b.lastName);
         if (b.arabicName) upd.arabic_name = String(b.arabicName);
@@ -267,7 +270,7 @@ async function handle(request: Request, splat: string) {
 
     if (method === "POST" && sub === "/settings") {
       const s = await m.getSettings();
-      const b = body as Record<string, unknown>;
+      const b = body;
       for (const k of ["name", "municipality", "wilaya", "eventDate", "welcomeTitleFr", "welcomeTitleAr", "welcomeSubtitleFr", "welcomeSubtitleAr", "resultsStatus"] as const) {
         if (b[k]) (s as unknown as Record<string, unknown>)[k] = String(b[k]);
       }
