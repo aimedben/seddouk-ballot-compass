@@ -78,7 +78,7 @@ export interface SecurityRecord {
 }
 
 export interface ElectionStatusResponse {
-  settings: ElectionSettings;
+  settings: ElectionSettings | null;
   hasVoted: boolean;
   totalValidBallots: number;
   totalParties: number;
