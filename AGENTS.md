@@ -28,3 +28,9 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Architecture
+- The election UI lives in `src/election/` (ported from the original app) and renders client-only via `ElectionClient` on `/` and `/adminin`; it reads browser storage on first render.
+- All election data goes through the single server route `src/routes/api/public/$.ts`, backed by `src/lib/election.server.ts`; tables have RLS with no public policies, so only that route (service role) reads/writes them.
+- Votes are cast atomically by the `cast_ballot` database function (one vote per hashed IP); admin endpoints check the caller's session and the `admin` role from `user_roles` on every request.
+- Live vote toasts come from realtime inserts on `vote_events`, which holds no IP data.
