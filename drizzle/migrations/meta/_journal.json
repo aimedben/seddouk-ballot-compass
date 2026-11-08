@@ -8,6 +8,13 @@
       "when": 1794097537510,
       "tag": "0000_election_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794097610609,
+      "tag": "0001_election_seed_data",
+      "breakpoints": true
     }
   ]
 }
