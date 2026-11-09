@@ -48,29 +48,29 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Main Navbar */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between gap-4">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 h-18 flex items-center justify-between gap-2 sm:gap-4">
         {/* Brand Zone with APC Diamond Emblem */}
         <button
           onClick={() => onNavigate('home')}
-          className="flex items-center gap-3 text-left rtl:text-right group cursor-pointer focus-visible:outline-2 focus-visible:outline-[#0060A8]"
+          className="flex min-w-0 items-center gap-2 sm:gap-3 text-left rtl:text-right group cursor-pointer focus-visible:outline-2 focus-visible:outline-[#0060A8]"
         >
           {/* Seddouk logo */}
           <img
             src="/seddouk-logo.png"
             alt="Logo Seddouk"
-            className="w-11 h-11 object-contain shrink-0 group-hover:scale-105 transition-transform"
+            className="w-9 h-9 sm:w-11 sm:h-11 object-contain shrink-0 group-hover:scale-105 transition-transform"
           />
 
-          <div className="flex flex-col">
+          <div className="flex min-w-0 flex-col">
             <div className="flex items-center gap-1.5">
-              <span className="text-base sm:text-lg font-black tracking-tight text-[#0060A8] whitespace-nowrap">
+              <span className="truncate text-sm sm:text-lg font-black tracking-tight text-[#0060A8] whitespace-nowrap">
                 SEDDOUK 2026
               </span>
-              <span className="text-[10px] bg-[#E0F2FE] text-[#0060A8] font-extrabold px-1.5 py-0.2 rounded-md border border-[#BAE6FD]">
+              <span className="hidden sm:inline text-[10px] bg-[#E0F2FE] text-[#0060A8] font-extrabold px-1.5 py-0.2 rounded-md border border-[#BAE6FD]">
                 APC
               </span>
             </div>
-            <span className="text-xs text-[#475569] font-semibold whitespace-nowrap">
+            <span className="hidden sm:block truncate text-xs text-[#475569] font-semibold whitespace-nowrap">
               {t.commune} · {t.wilaya}
             </span>
           </div>
@@ -111,11 +111,11 @@ export const Header: React.FC<HeaderProps> = ({
         </nav>
 
         {/* Action Zone: Notifications & Language */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {onOpenNotificationSettings && (
             <button
               onClick={onOpenNotificationSettings}
-              className="p-2.5 rounded-xl bg-[#F0F7FF] hover:bg-[#E0F2FE] text-[#0060A8] border border-[#D0DFEE] transition-colors cursor-pointer relative shadow-xs"
+              className="p-2 sm:p-2.5 rounded-xl bg-[#F0F7FF] hover:bg-[#E0F2FE] text-[#0060A8] border border-[#D0DFEE] transition-colors cursor-pointer relative shadow-xs"
               title={currentLang === 'ar' ? 'إعدادات الإشعارات' : 'Paramètres des notifications en direct'}
             >
               <Bell className="w-4 h-4" />
@@ -127,7 +127,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center bg-[#F1F5F9] border border-[#D0DFEE] rounded-xl p-0.5 shadow-xs">
             <button
               onClick={() => onLanguageChange('fr')}
-              className={`px-3 py-1.5 text-xs font-black rounded-lg transition-all cursor-pointer ${
+              className={`px-2 sm:px-3 py-1.5 text-xs font-black rounded-lg transition-all cursor-pointer ${
                 currentLang === 'fr'
                   ? 'bg-[#0060A8] text-white shadow-xs'
                   : 'text-[#475569] hover:text-[#0F172A]'
@@ -138,14 +138,14 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             <button
               onClick={() => onLanguageChange('ar')}
-              className={`px-3 py-1.5 text-xs font-black rounded-lg transition-all cursor-pointer ${
+              className={`px-2 sm:px-3 py-1.5 text-xs font-black rounded-lg transition-all cursor-pointer ${
                 currentLang === 'ar'
                   ? 'bg-[#0060A8] text-white shadow-xs'
                   : 'text-[#475569] hover:text-[#0F172A]'
               }`}
               title="التحويل إلى العربية"
             >
-              🇩🇿 العربية
+              🇩🇿 <span className="hidden sm:inline">العربية</span><span className="sm:hidden font-arabic">ع</span>
             </button>
           </div>
         </div>
