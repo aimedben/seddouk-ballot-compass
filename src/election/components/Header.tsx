@@ -106,7 +106,7 @@ export const Header: React.FC<HeaderProps> = ({
                 : 'text-[#475569]'
             }`}
           >
-            {currentLang === 'fr' ? 'Tableau d\'Affichage (Résultats)' : 'لوحة النتائج'}
+            {currentLang === 'fr' ? 'Résultats' : 'النتائج'}
           </button>
         </nav>
 

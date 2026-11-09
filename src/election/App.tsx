@@ -224,6 +224,11 @@ export function App() {
             onStart={() => setCurrentView('lists')}
             hasVoted={statusData.hasVoted}
             onViewResults={() => setCurrentView('results')}
+            stats={{
+              parties: statusData.totalParties,
+              candidates: statusData.totalCandidates,
+              ballots: statusData.totalValidBallots,
+            }}
           />
         )}
 

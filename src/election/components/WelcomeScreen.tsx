@@ -1,7 +1,6 @@
 import React from 'react';
-import { MousePointerClick, Calendar, ShieldCheck, Vote, Building2 } from 'lucide-react';
+import { MousePointerClick, Calendar, Vote, Users, ListChecks, FileText } from 'lucide-react';
 import { Language, translations } from '../i18n';
-import { AheddadEmblem } from './AheddadEmblem';
 import { ElectionSettings } from '../types';
 
 interface WelcomeScreenProps {
@@ -10,6 +9,7 @@ interface WelcomeScreenProps {
   onStart: () => void;
   hasVoted: boolean;
   onViewResults: () => void;
+  stats: { parties: number; candidates: number; ballots: number };
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
@@ -18,6 +18,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onStart,
   hasVoted,
   onViewResults,
+  stats,
 }) => {
   const t = translations[currentLang];
   const isAr = currentLang === 'ar';
