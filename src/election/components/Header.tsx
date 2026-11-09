@@ -66,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="truncate text-sm sm:text-lg font-black tracking-tight text-[#0060A8] whitespace-nowrap">
                 SEDDOUK 2026
               </span>
-              <span className="hidden xs:inline text-[10px] bg-[#E0F2FE] text-[#0060A8] font-extrabold px-1.5 py-0.2 rounded-md border border-[#BAE6FD]">
+              <span className="hidden sm:inline text-[10px] bg-[#E0F2FE] text-[#0060A8] font-extrabold px-1.5 py-0.2 rounded-md border border-[#BAE6FD]">
                 APC
               </span>
             </div>
