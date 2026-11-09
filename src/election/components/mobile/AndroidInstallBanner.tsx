@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Smartphone,
   Download,
@@ -28,6 +28,22 @@ export const AndroidInstallBanner: React.FC<AndroidInstallBannerProps> = ({
   });
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [installSuccess, setInstallSuccess] = useState(false);
+  const [bannerVisible, setBannerVisible] = useState(true);
+  const [bannerLeaving, setBannerLeaving] = useState(false);
+
+  // The install banner fades away by itself 10 seconds after the page opens
+  useEffect(() => {
+    if (isInstalled || isDismissed) return;
+    const fadeTimer = setTimeout(() => setBannerLeaving(true), 10000);
+    const removeTimer = setTimeout(() => {
+      setBannerVisible(false);
+      sessionStorage.setItem('seddouk_android_banner_dismissed', 'true');
+    }, 10600);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
+  }, [isInstalled, isDismissed]);
 
   // If already running inside installed standalone mobile app, hide install banner
   if (isInstalled || isDismissed) {
@@ -55,7 +71,8 @@ export const AndroidInstallBanner: React.FC<AndroidInstallBannerProps> = ({
   return (
     <>
       {/* Top Banner on Mobile & Desktop Access — Styled with APC Seddouk Municipal Colors */}
-      <div className="bg-gradient-to-r from-[#003865] via-[#0060A8] to-[#0284C7] text-white border-b border-[#004B87] shadow-md transition-all">
+      {bannerVisible && (
+      <div className={`bg-gradient-to-r from-[#003865] via-[#0060A8] to-[#0284C7] text-white border-b border-[#004B87] shadow-md transition-all duration-500 ease-in-out overflow-hidden ${bannerLeaving ? 'max-h-0 opacity-0 border-b-0 shadow-none' : 'max-h-40 opacity-100'}`}>
         <div className="max-w-6xl mx-auto px-4 py-2.5 sm:py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
           {/* Left info badge with APC emblem */}
           <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -112,6 +129,7 @@ export const AndroidInstallBanner: React.FC<AndroidInstallBannerProps> = ({
           </div>
         </div>
       </div>
+      )}
 
       {/* Guide Modal when direct beforeinstallprompt is blocked or user asks */}
       {showGuideModal && (

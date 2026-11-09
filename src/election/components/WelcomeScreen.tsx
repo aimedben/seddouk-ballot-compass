@@ -1,7 +1,6 @@
 import React from 'react';
-import { MousePointerClick, Calendar, ShieldCheck, Vote, Building2 } from 'lucide-react';
+import { MousePointerClick, Calendar, Vote, Users, ListChecks, FileText } from 'lucide-react';
 import { Language, translations } from '../i18n';
-import { AheddadEmblem } from './AheddadEmblem';
 import { ElectionSettings } from '../types';
 
 interface WelcomeScreenProps {
@@ -10,6 +9,7 @@ interface WelcomeScreenProps {
   onStart: () => void;
   hasVoted: boolean;
   onViewResults: () => void;
+  stats: { parties: number; candidates: number; ballots: number };
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
@@ -18,6 +18,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onStart,
   hasVoted,
   onViewResults,
+  stats,
 }) => {
   const t = translations[currentLang];
   const isAr = currentLang === 'ar';
@@ -55,11 +56,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
       {/* Main Center Content */}
       <div className="my-auto text-center flex flex-col items-center">
-        {/* Symbolic Emblem of Cheikh Aheddad with APC Seddouk diamond frame */}
+        {/* Official Seddouk logo above the welcome title */}
         <div className="mb-6 relative">
           <div className="absolute -inset-2 bg-gradient-to-r from-[#0060A8]/20 to-[#0284C7]/20 rounded-3xl blur-md" />
           <div className="relative">
-            <AheddadEmblem size={110} />
+            <img
+              src="/seddouk-logo.png"
+              alt="Logo Seddouk"
+              className="w-28 h-28 sm:w-32 sm:h-32 object-contain drop-shadow-sm"
+            />
           </div>
         </div>
 
@@ -77,6 +82,45 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         <p className="mt-4 text-base sm:text-lg text-[#334155] max-w-xl font-semibold leading-relaxed">
           {t.welcomeSubtitle}
         </p>
+
+        {/* Key figures read live from the cloud database */}
+        <div className="mt-8 w-full max-w-2xl grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          <div className="rounded-2xl bg-white border border-[#D0DFEE] px-4 py-5 shadow-xs text-center">
+            <div className="w-10 h-10 rounded-xl bg-[#E0F2FE] text-[#0060A8] flex items-center justify-center mx-auto mb-2.5">
+              <ListChecks className="w-5 h-5" />
+            </div>
+            <div className="text-3xl font-black text-[#0060A8] tabular-nums leading-none">
+              {stats.parties}
+            </div>
+            <div className="mt-1.5 text-[11px] sm:text-xs font-extrabold uppercase tracking-wide text-[#475569]">
+              {isAr ? 'قوائم مترشحة' : 'Listes en lice'}
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-white border border-[#D0DFEE] px-4 py-5 shadow-xs text-center">
+            <div className="w-10 h-10 rounded-xl bg-[#E0F2FE] text-[#0060A8] flex items-center justify-center mx-auto mb-2.5">
+              <Users className="w-5 h-5" />
+            </div>
+            <div className="text-3xl font-black text-[#0060A8] tabular-nums leading-none">
+              {stats.candidates}
+            </div>
+            <div className="mt-1.5 text-[11px] sm:text-xs font-extrabold uppercase tracking-wide text-[#475569]">
+              {isAr ? 'مترشح مسجل' : 'Candidats inscrits'}
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-white border border-[#D0DFEE] px-4 py-5 shadow-xs text-center">
+            <div className="w-10 h-10 rounded-xl bg-[#FEF3C7] text-[#B45309] flex items-center justify-center mx-auto mb-2.5">
+              <FileText className="w-5 h-5" />
+            </div>
+            <div className="text-3xl font-black text-[#0F172A] tabular-nums leading-none">
+              {stats.ballots}
+            </div>
+            <div className="mt-1.5 text-[11px] sm:text-xs font-extrabold uppercase tracking-wide text-[#475569]">
+              {isAr ? 'أصوات مسجلة' : 'Bulletins de vote'}
+            </div>
+          </div>
+        </div>
 
         {/* Status notice if already participated */}
         {hasVoted && (
